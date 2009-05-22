@@ -52,6 +52,15 @@ MID_LEVEL = enum(*"""
 """.split())
 
 
+OSCCAL_ADDRESS = 3 # Real value = 0x3ff
+OSCCAL_MASK = intbv(15360)[14:] # 11110000000000
+RETLW_MASK = intbv(13312)[14:]  # 11010000000000
+
+
+class InvalidOSCCALError(Exception): pass
+class FaultyWriteError(Exception): pass
+
+
 # The lowest level of programming the PIC involves sending and receiving
 # data over a serial connection to and from the chip.  So we create a
 # base class that provides just those two calls, and a "rest" call that
@@ -452,6 +461,85 @@ class MetaCommands:
             yield self.start()
             print 'RESET FINISHED'
         return Resetter
+
+    def programCycle(self, data):
+        @instance
+        def block():
+            yield self.LoadProg(data)
+            yield self.BeginProg()
+
+            output = []
+            yield self.ReadProg(output)
+            if output[0] != data:
+                raise FaultyWriteError
+
+            yield self.IncrAddr()
+
+        return block
+
+    def readOSCCAL(self):
+        @instance
+        def block():
+            output = []
+
+            yield self.reset()
+
+            for _ in xrange(OSCCAL_ADDRESS):
+                yield self.IncrAddr()
+
+            yield self.ReadProg(output)
+
+            OSCCAL = output[0]
+
+    ##        if OSCCAL & OSCCAL_MASK != RETLW_MASK:
+    ##            raise InvalidOSCCALError
+
+            self.OSCCAL = OSCCAL
+
+        return block
+
+    def readIDAndBandGap(self):
+        @instance
+        def block():
+            output = []
+
+            yield self.reset()
+
+            yield self.LoadConf(intbv(0)[14:])
+
+            for _ in range(4):
+                yield self.ReadProg(output)
+                yield self.IncrAddr()
+
+            for _ in range(3):
+                yield self.IncrAddr()
+
+            yield self.ReadProg(output)
+
+            ID, BG = tuple(output[:4]), output[-1]
+
+            self.ID = ID
+            self.BG = BG
+
+        return block
+
+    def bulkEraseDevice(self):
+        @instance
+        def block():
+            for attr in ('OSCCAL', 'ID', 'BG'):
+                if not hasattr(self, attr):
+                    raise Exception('aw %s' % repr(attr))
+            yield self.EraseProg()
+            yield self.EraseData()
+        return block
+
+    def cleanDevice(self):
+        @instance
+        def block():
+            yield self.readOSCCAL()
+            yield self.readIDAndBandGap()
+            yield self.bulkEraseDevice()
+        return block
 
 
 class Programmer(
