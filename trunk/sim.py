@@ -20,19 +20,13 @@
 '''
 from util import initialize
 from programmer import LOW_LEVEL, MID_LEVEL, Programmer
-
-
 from myhdl import (
     Signal,
-    intbv,
     Simulation,
     instance,
     traceSignals,
     StopSimulation,
-    bin,
     )
-
-from random import randint
 ##import parallel
 
 
@@ -79,10 +73,8 @@ def main():
 
     return init_blocks, Program
 
-ts = traceSignals(main)
-sim = Simulation(ts)
 
-sim.run()
-
-
-
+if __name__ == '__main__':
+    ts = traceSignals(main)
+    sim = Simulation(ts)
+    sim.run()
