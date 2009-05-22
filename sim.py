@@ -694,7 +694,5 @@ if __name__ == '__main__':
 #    ts = traceSignals(main)
 #    sim = Simulation(ts)
 
-    (c, cl, pd), p = main()
-    compenents = c, cl, pd, p
-    sim = Simulation(compenents)
+    sim = Simulation(main())
     sim.run()
