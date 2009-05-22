@@ -29,11 +29,15 @@ from myhdl import (
     join,
     Signal,
     Simulation,
-    instance,
+#    instance,
     traceSignals,
     StopSimulation,
     )
 ##import parallel
+
+
+def instance(function):
+    return function()
 
 
 logging.basicConfig(format='%(message)s', level=logging.DEBUG)
@@ -687,6 +691,10 @@ def main():
 
 
 if __name__ == '__main__':
-    ts = traceSignals(main)
-    sim = Simulation(ts)
+#    ts = traceSignals(main)
+#    sim = Simulation(ts)
+
+    (c, cl, pd), p = main()
+    compenents = c, cl, pd, p
+    sim = Simulation(compenents)
     sim.run()
