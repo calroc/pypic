@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 '''
     PyPIC - A simple 12F675 PIC Programmer.
-    Copyright (C) 2007 Simon Forman.
+    Copyright (C) 2007, 2008, 2009 Simon Forman.
 
     PyPIC is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the
@@ -36,7 +36,7 @@ from myhdl import (
 ##import parallel
 
 
-logging.basicConfig(format='%(message)s', level=10)
+logging.basicConfig(format='%(message)s', level=logging.DEBUG)
 log = logging.getLogger()
 
 
@@ -76,8 +76,8 @@ MID_LEVEL = enum(*"""
 
 
 OSCCAL_ADDRESS = 3 # Real value = 0x3ff
-OSCCAL_MASK = intbv(15360)[14:] # 11110000000000
-RETLW_MASK = intbv(13312)[14:]  # 11010000000000
+OSCCAL_MASK = intbv(int('11110000000000', 2))[14:]
+RETLW_MASK = intbv(int('11010000000000', 2))[14:]
 
 
 class InvalidOSCCALError(Exception): pass
