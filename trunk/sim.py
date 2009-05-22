@@ -20,7 +20,7 @@
 '''
 from util import initialize
 from programmer import LOW_LEVEL, MID_LEVEL, Programmer
-from blocks import ProgramCycle, CleanDevice
+
 
 from myhdl import (
     Signal,
@@ -73,7 +73,7 @@ def main():
 
     @instance
     def Program():
-        yield CleanDevice(programmer)
+        yield programmer.cleanDevice()
         yield programmer.shutdown()
         raise StopSimulation
 
